@@ -148,10 +148,10 @@ bool Matek3901::Read() {
       else if (state_ == RANGE_CHK_POS_){
         chk_ = checksum(chk_buf_, 10);
         if (c_ == chk_){
-          range_qual_ = range_qual_buf;
+          range_qual_ = range_qual_buf_;
           range_mm_ = (int32_t)(((uint32_t)range_buf_[3]<<24) | ((uint32_t)range_buf_[2]<<16) |
                                 ((uint32_t)range_buf_[1]<<8) | range_buf_[0]);
-          range_m_ = float(range_mm)_  * mm2m;
+          range_m_ = float(range_mm_)  * mm2m;
         }
         state_ = 0;
       }
@@ -201,13 +201,13 @@ bool Matek3901::Read() {
       else if (state_ == OPFLOW_CHK_POS_){
         chk_ = checksum(chk_buf_, 14);
         if (c_ == chk_){
-          sur_qual_ = sur_qual_buf;
+          sur_qual_ = sur_qual_buf_;
           x_mot_ = (int32_t)(((uint32_t)xmot_buf_[3]<<24) | ((uint32_t)xmot_buf_[2]<<16) |
                                 ((uint32_t)xmot_buf_[1]<<8) | xmot_buf_[0]);
           y_mot_ = (int32_t)(((uint32_t)ymot_buf_[3]<<24) | ((uint32_t)ymot_buf_[2]<<16) |
                                 ((uint32_t)ymot_buf_[1]<<8) | ymot_buf_[0]);
         }
-        new_flow_data = true
+        new_flow_data = true;
         state_ = 0;
         return true;
       }
