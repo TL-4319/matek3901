@@ -47,7 +47,7 @@ class Matek3901 {
 
  private:
   /* Checksum */
-  //uint8_t checksum()
+  uint8_t checksum(const uint8_t &buf[14], const uint8_t &size)
   /* Communication */
   static constexpr int16_t COMM_TIMEOUT_MS_ = 5000;
   static constexpr int32_t BAUD_ = 115200;
@@ -94,8 +94,8 @@ class Matek3901 {
   } msg_type_;
   uint8_t c_;
   uint8_t state_ = 0;
-  uint8_t sur_qual_, range_qual_, chk_, size_lsb_, size_msb_;
-  uint8_t buf_[6];
+  uint8_t sur_qual_buf_, range_qual_buf_, chk_, size_lsb_, size_msb_;
+  uint8_t chk_buf_[14];
   uint8_t range_buf_[4];
   uint8_t xmot_buf_[4];
   uint8_t ymot_buf_[4];
