@@ -46,6 +46,8 @@ class Matek3901 {
   inline int32_t y_mot() const {return y_mot_;}
 
  private:
+  /* Checksum */
+  //uint8_t checksum()
   /* Communication */
   static constexpr int16_t COMM_TIMEOUT_MS_ = 5000;
   static constexpr int32_t BAUD_ = 115200;
@@ -72,21 +74,31 @@ class Matek3901 {
   static constexpr uint8_t HEADER2_POS_ = 1;
   static constexpr uint8_t TYPE_POS_ = 2;
   static constexpr uint8_t FLAG_POS_ = 3;
-  static constexpr uint8_t FUNC_POS_ = 4;
-  static constexpr uint8_t SENSOR_TYPE_POS_ = 5;
+  static constexpr uint8_t SENSOR_TYPE_POS_ = 4;
+  static constexpr uint8_t FUNC_POS_ = 5;
   static constexpr uint8_t SIZE_LSB_POS_ = 6;
   static constexpr uint8_t SIZE_MSB_POS_ = 7;
-  static constexpr uint8_t SNR_POS_ = 4;
-  static constexpr uint8_t CHK_POS_ = 5;
+  /* RANGE FRAME */
+  static constexpr uint8_t RANGE_POS_ = 8;
+  static constexpr uint8_t RANGE_QUAL_POS_ = 12;
+  static constexpr uint8_t RANGE_CHK_POS_ = 13;
+  /* OPFLOW FRAME */
+  static constexpr uint8_t XMOT_POS_ = 8;
+  static constexpr uint8_t YMOT_POS_ = 12;
+  static constexpr uint8_t OPFLOW_QUAL_POS_ = 16;
+  static constexpr uint8_t OPFLOW_CHK_POS_ = 17;
+
   enum msg_type {
     RANGE,
     OPFLOW
   } msg_type_;
   uint8_t c_;
   uint8_t state_ = 0;
-  uint8_t alt_lsb_, alt_msb_, snr_, chk_, size_lsb_, size_msb_;
+  uint8_t sur_qual_, range_qual_, chk_, size_lsb_, size_msb_;
   uint8_t buf_[6];
-  bool new_flow_data;
+  uint8_t range_buf_[4];
+  uint8_t xmot_buf_[4];
+  uint8_t ymot_buf_[4];
 };
 
 }  // namespace bfs

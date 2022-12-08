@@ -44,112 +44,152 @@ bool Matek3901::Begin() {
 }
 
 bool Matek3901::Read() {
-  new_flow_data = false;
+  bool new_flow_data = false;
   while ((bus_->available()) && !new_flow_data) {
     c_ = bus_->read();
     // Parse message until the point the message type 
     if (state_ == HEADER1_POS_) {
       if (c_ == MATEK_HEADER1_) {
         state_++;
+        continue;
+      }
+      else{
+        state_ = 0;
       }
     }
     else if (state_ == HEADER2_POS_) {
       if (c_ == MATEK_HEADER2_) {
         state_++;
+        continue;
+      }
+      else{
+        state_ = 0;
       }
     }
     else if (state_ == TYPE_POS_) {
       if (c_ == MATEK_TYPE_) {
         state_++;
+        continue;
+      }
+      else{
+        state_ = 0;
       }
     }
     else if (state_ == FLAG_POS_) {
       if (c_ == MATEK_FLAG_) {
         state_++;
+        continue;
       }
-    }
-    else if (state_ == FUNC_POS_) {
-      if (c_ == MATEK_FUNC_CLASS_) {
-        state_++;
+      else{
+        state_ = 0;
       }
     }
     else if (state_ == SENSOR_TYPE_POS_) {
       if (c_ == MATEK_OPFLOW_) {
         msg_type_ = OPFLOW;
         state_++;
+        continue;
       }
       else if (c_ == MATEK_RANGE_) {
         msg_type_ = RANGE;
         state_++;
+        continue;
+      }
+      else{
+        state_ = 0;
       }
     }
-    else if (state_ == SIZE_LSB_POS_) {
-      size_lsb_ = c_;
-      state_++;
-    }
-    else if (state_ == SIZE_MSB_POS_) {
-      size_msb_ = c_;
-      state_++;
-    }
-    else {
-      state_ = 0;
-    }
+    
 
     // Handle msg from different sensors
     if (msg_type_ == RANGE) {
-    
+      if (state_ == FUNC_POS_){
+        if (c_ = MATEK_FUNC_CLASS_){
+          state_++;
+        }
+      }
+      else if (state_ == SIZE_LSB_POS_){
+        if (c_ == 0x05){
+          size_lsb_ = c_;
+          state_ ++;
+        }
+        else {
+          state_ = 0;
+        }
+      }
+      else if (state_ == SIZE_MSB_POS_){
+        if (c_ == 0x00){
+          size_msb_ = c_;
+          state_ ++;
+        }
+        else {
+          state_ = 0;
+        }
+      }
+      else if ((state_ >= RANGE_POS_) && (state_ < RANGE_QUAL_POS_)){
+        range_buf_[state_ - RANGE_POS_] = c_;
+        state_++;
+      }
+      else if (state_ == RANGE_QUAL_POS_){
+        range_qual_ = c_;
+        state_++;
+      }
+      else if (state_ == RANGE_CHK_POS_){
+        chk_ = c_;
+        /* DO CHECKSUM AND DATA CALCULATION HERE BOI */
 
+        //
+        state_ = 0;
+        return true;
+      }
     }
     else if (msg_type_ == OPFLOW) {
-
-
-    }
-
-    switch (state_) {
-      case HEADER_POS_: {
-        if (c_ == HEADER_) {
+      if (state_ == FUNC_POS_){
+        if (c_ = MATEK_FUNC_CLASS_){
           state_++;
         }
-        break;
       }
-      case VER_POS_: {
-        if (c_ == VER_) {
-          state_++;
+      else if (state_ == SIZE_LSB_POS_){
+        if (c_ == 0x09){
+          size_lsb_ = c_;
+          state_ ++;
         }
-        break;
-      }
-      case ALT_LSB_POS_: {
-        alt_lsb_ = c_;
-        state_++;
-        break;
-      }
-      case ALT_MSB_POS_: {
-        alt_msb_ = c_;
-        state_++;
-        break;
-      }
-      case SNR_POS_: {
-        snr_ = c_;
-        state_++;
-        break;
-      }
-      case CHK_POS_: {
-        state_ = 0;
-        /* Compute and check the checksum */
-        chk_ = (VER_ + alt_msb_ + alt_lsb_ + snr_) & 0xFF;
-        if (chk_ == c_) {
-          alt_cm_ = static_cast<int16_t>(alt_msb_) << 8 | alt_lsb_;
-          alt_m_ = static_cast<float>(alt_cm_) * cm2m;
-          snr_nd_ = snr_;
-          return true;
+        else {
+          state_ = 0;
         }
-        break;
       }
-      default: {
+      else if (state_ == SIZE_MSB_POS_){
+        if (c_ == 0x00){
+          size_msb_ = c_;
+          state_ ++;
+        }
+        else {
+          state_ = 0;
+        }
+      }
+      else if ((state_ >= XMOT_POS_) && (state_ < YMOT_POS_)){
+        xmot_buf_[state_ - XMOT_POS_] = c_;
+        state_++;
+      }
+      else if ((state_ >= YMOT_POS_) && (state_ < OPFLOW_QUAL_POS_)){
+        ymot_buf_[state_ - YMOT_POS_] = c_;
+        state_++;
+      }
+      else if (state_ == OPFLOW_QUAL_POS_){
+        sur_qual_ = c_;
+        state_++;
+      }
+      else if (state_ == OPFLOW_CHK_POS_){
+        chk_ = c_;
+        /* DO CHECKSUM AND DATA CALCULATION HERE BOI */
+
+        //
+        new_flow_data = true
         state_ = 0;
-        break;
+        return true;
       }
     }
+
   }
   return false;
 }
