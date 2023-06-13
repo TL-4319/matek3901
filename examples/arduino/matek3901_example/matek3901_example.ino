@@ -39,9 +39,9 @@ void setup() {
 void loop() {
   /* Check for new data */
   if (opflow.Read()) {
-    Serial.print(radalt.alt_m());
+    Serial.print(opflow.range_m());
     Serial.print("\t");
-    Serial.print(radalt.snr());
+    Serial.print(opflow.range_qual());
     Serial.print("\n");
   }
 }

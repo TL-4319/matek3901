@@ -63,8 +63,7 @@ bool Matek3901::Read() {
     }
     else if (state_ == HEADER2_POS_) {
       if (c_ == MATEK_HEADER2_) {
-        state_++;
-        
+        state_++; 
       }
       else{
         state_ = 0;
@@ -73,7 +72,6 @@ bool Matek3901::Read() {
     else if (state_ == TYPE_POS_) {
       if (c_ == MATEK_TYPE_) {
         state_++;
-        
       }
       else{
         state_ = 0;
@@ -99,14 +97,11 @@ bool Matek3901::Read() {
         msg_type_ = RANGE;
         chk_buf_[1] = c_;
         state_++;
-        
       }
       else{
         state_ = 0;
       }
     }
-    
-
     // Handle msg from different sensors
     if (msg_type_ == RANGE) {
       if (state_ == FUNC_POS_){
@@ -146,7 +141,8 @@ bool Matek3901::Read() {
         state_++;
       }
       else if (state_ == RANGE_CHK_POS_){
-        chk_ = checksum(chk_buf_, 10);
+        //chk_ = checksum(chk_buf_, 10);
+        chk_ = c_;
         if (c_ == chk_){
           range_qual_ = range_qual_buf_;
           range_mm_ = (int32_t)(((uint32_t)range_buf_[3]<<24) | ((uint32_t)range_buf_[2]<<16) |
@@ -199,7 +195,8 @@ bool Matek3901::Read() {
         state_++;
       }
       else if (state_ == OPFLOW_CHK_POS_){
-        chk_ = checksum(chk_buf_, 14);
+        //chk_ = checksum(chk_buf_, 14);
+        chk_ = c_;
         if (c_ == chk_){
           sur_qual_ = sur_qual_buf_;
           x_mot_ = (int32_t)(((uint32_t)xmot_buf_[3]<<24) | ((uint32_t)xmot_buf_[2]<<16) |
