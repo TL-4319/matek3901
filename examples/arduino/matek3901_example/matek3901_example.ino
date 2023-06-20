@@ -1,8 +1,8 @@
 /*
-* Brian R Taylor
-* brian.taylor@bolderflight.com
+* Tuan Luong
+* tdluong@crimson.ua.edu  
 * 
-* Copyright (c) 2022 Bolder Flight Systems
+* 
 * 
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
 * and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -22,8 +22,8 @@
 
 #include "matek3901.h"
 
-/* Matek3901 object on UART1 */
-bfs::Matek3901 opflow(&Serial1);
+/* Matek3901 object on UART4 */
+bfs::Matek3901 opflow(&Serial4);
 
 void setup() {
   /* Serial to display data */
@@ -31,7 +31,7 @@ void setup() {
   while (!Serial) {}
   /* Initialize communication */
   if (!opflow.Begin()) {
-    Serial.println("Unable to communicate with Ainstein US-D1");
+    Serial.println("Unable to communicate with Matek3901");
     while (1) {}
   }
 }
@@ -39,7 +39,7 @@ void setup() {
 void loop() {
   /* Check for new data */
   if (opflow.Read()) {
-    Serial.print(opflow.range_m());
+    Serial.print(opflow.range_mm());
     Serial.print("\t");
     Serial.print(opflow.range_qual());
     Serial.print("\n");

@@ -39,15 +39,15 @@ class Matek3901 {
   void Config(HardwareSerial *bus) {bus_ = bus;}
   bool Begin();
   bool Read();
-  inline float range_m() const {return range_m_;}
+  inline int32_t range_mm() const {return range_mm_.i4;}
   inline uint8_t sur_qual() const {return sur_qual_;}
   inline uint8_t range_qual() const {return range_qual_;}
-  inline int32_t x_mot() const {return x_mot_;}
-  inline int32_t y_mot() const {return y_mot_;}
-
+  inline int32_t mot_x() const {return mot_x_.i4;}
+  inline int32_t mot_y() const {return mot_y_.i4;}
+  
  private:
-  /* Checksum */
-  uint8_t checksum(const uint8_t &buf[14], const uint8_t &size)
+ /* Checksum */
+  void crc8_dvb_s2(uint8_t &crc, const uint8_t &a);
   /* Communication */
   static constexpr int16_t COMM_TIMEOUT_MS_ = 5000;
   static constexpr int32_t BAUD_ = 115200;
@@ -56,17 +56,14 @@ class Matek3901 {
   /* Data */
   uint8_t sur_qual_;
   uint8_t range_qual_;
-  int32_t x_mot_;
-  int32_t y_mot_;
-  uint32_t range_mm_;
-  float range_m_;
-  static constexpr float mm2m = 1.0f / 1000.0f;
+  typedef union {uint8_t bytes[4]; int32_t i4;} union_32;
+  union_32 range_mm_, mot_x_, mot_y_; 
   /* Parser */
   static constexpr uint8_t MATEK_HEADER1_ = 0x24;
   static constexpr uint8_t MATEK_HEADER2_ = 0x58;
   static constexpr uint8_t MATEK_TYPE_ = 0x3C;
   static constexpr uint8_t MATEK_FLAG_ = 0x00;
-  static constexpr uint8_t MATEK_FUNC_CLASS_ = 0x1F;
+  //static constexpr uint8_t MATEK_FUNC_CLASS_ = 0x1F;
   static constexpr uint8_t MATEK_OPFLOW_ = 0x02;
   static constexpr uint8_t MATEK_RANGE_ = 0x01;
 
@@ -75,30 +72,15 @@ class Matek3901 {
   static constexpr uint8_t TYPE_POS_ = 2;
   static constexpr uint8_t FLAG_POS_ = 3;
   static constexpr uint8_t SENSOR_TYPE_POS_ = 4;
-  static constexpr uint8_t FUNC_POS_ = 5;
-  static constexpr uint8_t SIZE_LSB_POS_ = 6;
-  static constexpr uint8_t SIZE_MSB_POS_ = 7;
-  /* RANGE FRAME */
-  static constexpr uint8_t RANGE_POS_ = 8;
-  static constexpr uint8_t RANGE_QUAL_POS_ = 12;
-  static constexpr uint8_t RANGE_CHK_POS_ = 13;
-  /* OPFLOW FRAME */
-  static constexpr uint8_t XMOT_POS_ = 8;
-  static constexpr uint8_t YMOT_POS_ = 12;
-  static constexpr uint8_t OPFLOW_QUAL_POS_ = 16;
-  static constexpr uint8_t OPFLOW_CHK_POS_ = 17;
+  static constexpr uint8_t LIDAR_CHECKSUM_POS_ = 13;
+  static constexpr uint8_t OPFLOW_CHECKSUM_POS_ = 17;
 
-  enum msg_type {
-    RANGE,
-    OPFLOW
-  } msg_type_;
+  /* Driver state parameters*/
   uint8_t c_;
   uint8_t state_ = 0;
-  uint8_t sur_qual_buf_, range_qual_buf_, chk_, size_lsb_, size_msb_;
-  uint8_t chk_buf_[14];
-  uint8_t range_buf_[4];
-  uint8_t xmot_buf_[4];
-  uint8_t ymot_buf_[4];
+  uint8_t buf_[13];
+  uint8_t type_ = 0; // 0 - None, 1 - lidar, 2 - opflow
+  uint8_t crc_ = 0x00;
 };
 
 }  // namespace bfs
